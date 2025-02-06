@@ -53,10 +53,10 @@ def loopFourNodes() -> bool:
 @Test.test
 def connectedNodes() -> bool:
     graph, ANode = Graph.createAround("A")
-    successfulB, BNode = graph.addConnected("B", ANode)
-    successfulC, CNode = graph.addConnected("C", ANode)
+    _, BNode = graph.addConnected("B", ANode)
+    _, CNode = graph.addConnected("C", ANode)
 
-    successfulD, DNode = graph.addConnected("D", BNode)
+    _, DNode = graph.addConnected("D", BNode)
     graph.connectNodes(DNode, CNode)
     
     return graph.getConnectedNodes(ANode) == set([ANode, BNode, CNode, DNode])
@@ -65,7 +65,7 @@ def connectedNodes() -> bool:
 @Test.test
 def removeEdgeUnsafe() -> bool:
     graph, ANode = Graph.createAround("A")
-    successfulB, BNode = graph.addConnected("B", ANode)
+    _, BNode = graph.addConnected("B", ANode)
 
     graph._removeConnection_unsafe(ANode, BNode)
 
@@ -76,7 +76,7 @@ def removeEdgeUnsafe() -> bool:
 @Test.test
 def removeNodeUnsafe() -> bool:
     graph, ANode = Graph.createAround("A")
-    successfulB, BNode = graph.addConnected("B", ANode)
+    _, BNode = graph.addConnected("B", ANode)
 
     graph._removeNode_unsafe(BNode)
 
@@ -87,13 +87,66 @@ def removeNodeUnsafe() -> bool:
 @Test.test
 def removeEdge() -> bool:
     graph1, ANode = Graph.createAround("A")
-    successfulB, BNode = graph1.addConnected("B", ANode)
+    _, BNode = graph1.addConnected("B", ANode)
 
     graph2 = graph1.removeConnectionAndSplit(ANode, BNode)
 
     correctStructure = graph1.adjacencyList == {ANode: set()}\
                         and graph2.adjacencyList == {BNode: set()}
+
+    return correctStructure
+
+
+@Test.test
+def removeNodeNoSplit() -> bool:
+    graph, ANode = Graph.createAround("A")
+    _, BNode = graph.addConnected("B", ANode)
+    _, CNode = graph.addConnected("C", BNode)
+
+    newGraphs = graph.removeNode(CNode)
+
+    correctStructure = len(newGraphs) == 0 \
+                        and graph.adjacencyList == {ANode: set([BNode]), BNode: set([ANode])}
     
+    return correctStructure
+
+
+@Test.test
+def removeNodeWithSplit() -> bool:
+    """
+    Graph:
+            D - E
+            |
+        A - B - C
+    
+    Should split into:
+    A, C, D-E
+    """
+    graph, ANode = Graph.createAround("A")
+    _, BNode = graph.addConnected("B", ANode)
+    _, CNode = graph.addConnected("C", BNode)
+    _, DNode = graph.addConnected("D", BNode)
+    _, ENode = graph.addConnected("E", DNode)
+
+    newGraphs = graph.removeNode(BNode)
+
+    correctStructure = True
+
+    for _graph in newGraphs.union([graph]):
+        if not correctStructure:
+            break
+
+        nodes = _graph.adjacencyList.keys()
+
+        if ANode in nodes:
+            correctStructure = _graph.adjacencyList == {ANode: set()}
+        elif BNode in nodes:
+            correctStructure = False
+        elif CNode in nodes:
+            correctStructure = _graph.adjacencyList == {CNode: set()}
+        elif DNode in nodes:
+            correctStructure = _graph.adjacencyList == {DNode: set([ENode]), ENode: set([DNode])}
+
     return correctStructure
 
 

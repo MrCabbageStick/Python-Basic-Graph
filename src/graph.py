@@ -20,7 +20,6 @@ class Graph:
         first_node = list(graph.adjacencyList.keys())[0]
         return (graph, first_node)
     
-    
     def addNode(self, data: any) -> Node:
         node = Node(data)
         self.adjacencyList[node] = set()
@@ -68,12 +67,11 @@ class Graph:
         if not node in self.adjacencyList.keys():
             return
 
+        connectedTo = self.adjacencyList.get(node)
         self.adjacencyList.pop(node)
-        for connections in self.adjacencyList.values():
-            try:
-                connections.remove(node)
-            except:
-                ...
+
+        for endNode in connectedTo:
+            self.adjacencyList.get(endNode).discard(node)
 
 
     def removeConnectionAndSplit(self, node1: Node, node2: Node) -> (Self | None):
@@ -101,6 +99,42 @@ class Graph:
 
         return newGraph
 
+
+    def removeNode(self, node: Node) -> set[Self]:
+        if not node in self.adjacencyList.keys():
+            return set()
+        
+        danglingNodes = self.adjacencyList.get(node)
+        self._removeNode_unsafe(node)
+
+        if len(danglingNodes) == 0:
+            return set()
+
+        # Find nodes outside of the graph
+        currentGraphNodes = self.getConnectedNodes(danglingNodes.pop())
+        danglingNodes = danglingNodes.difference(currentGraphNodes)
+
+        newGraphs: set[Graph] = set()
+
+        # Combine dangling nodes to new graphs
+        while len(danglingNodes) > 0:
+            _node = danglingNodes.pop()
+            newGraphNodes = self.getConnectedNodes(_node)
+
+            newGraph = Graph(None)
+            newGraph.adjacencyList = dict([
+                entry
+                for entry in self.adjacencyList.items()
+                if entry[0] in newGraphNodes
+            ])
+            newGraphs.add(newGraph)
+
+            danglingNodes = danglingNodes.difference(newGraphNodes)
+
+            for __node in newGraphNodes:
+                self.adjacencyList.pop(__node)
+
+        return newGraphs
 
     
     def getConnectedNodes(self, node: Node) -> list[Node]:
