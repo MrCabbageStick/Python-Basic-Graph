@@ -118,8 +118,8 @@ class Graph:
 
         # Combine dangling nodes to new graphs
         while len(danglingNodes) > 0:
-            _node = danglingNodes.pop()
-            newGraphNodes = self.getConnectedNodes(_node)
+            newGraphSeed = danglingNodes.pop()
+            newGraphNodes = self.getConnectedNodes(newGraphSeed)
 
             newGraph = Graph(None)
             newGraph.adjacencyList = dict([
@@ -131,8 +131,8 @@ class Graph:
 
             danglingNodes = danglingNodes.difference(newGraphNodes)
 
-            for __node in newGraphNodes:
-                self.adjacencyList.pop(__node)
+            for nodeToRemove in newGraphNodes:
+                self.adjacencyList.pop(nodeToRemove)
 
         return newGraphs
 
