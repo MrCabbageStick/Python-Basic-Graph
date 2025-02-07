@@ -158,6 +158,11 @@ class Graph:
     
 
     def mergeWith(self, graphNode: Node, otherGraph: Self, otherGraphNode: Node) -> None:
+        """
+        Appends connections of otherGraph to the current graph,
+        creates a link between graphNode and otherGraphNode,
+        cleans otherGraph
+        """
         if not (graphNode in self.adjacencyList.keys() and otherGraphNode in otherGraph.adjacencyList.keys()):
             return
         
