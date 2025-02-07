@@ -155,3 +155,24 @@ class Graph:
             ])
         
         return set(visitedNodes)
+    
+
+    def mergeWith(self, graphNode: Node, otherGraph: Self, otherGraphNode: Node) -> None:
+        if not (graphNode in self.adjacencyList.keys() and otherGraphNode in otherGraph.adjacencyList.keys()):
+            return
+        
+        # Connect nodes
+        self.adjacencyList[graphNode].add(otherGraphNode)
+        otherGraph.adjacencyList[otherGraphNode].add(graphNode)
+        
+        # Merge adjacency lists
+        self.adjacencyList.update([
+            *self.adjacencyList.items(),
+            *otherGraph.adjacencyList.items()
+        ])
+
+        # Make transfer more permanent
+        otherGraph.adjacencyList = {}
+
+
+

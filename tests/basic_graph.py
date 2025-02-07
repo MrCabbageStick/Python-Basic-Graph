@@ -150,5 +150,25 @@ def removeNodeWithSplit() -> bool:
     return correctStructure
 
 
+@Test.test
+def mergeTwoGraphs() -> bool:
+    graph, ANode = Graph.createAround("A")
+    _, BNode = graph.addConnected("B", ANode)
+
+    graph2, CNode = Graph.createAround("C")
+    _, DNode = graph2.addConnected("D", CNode)
+
+    graph.mergeWith(BNode, graph2, CNode)
+
+    correctStructure = graph.adjacencyList == {
+        ANode: set([BNode]),
+        BNode: set([ANode, CNode]),
+        CNode: set([BNode, DNode]),
+        DNode: set([CNode])
+    } and graph2.adjacencyList == {}
+
+    return correctStructure
+
+
 if __name__ == "__name__":
     Test.runAll()
